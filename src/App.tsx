@@ -22,42 +22,54 @@ function App() {
   const [apple, setApple] = useState(initialApple);
   const [snakeDirection, setSnakeDirection] = useState([0, -1]);
   const [gameOver, setGameOver] = useState(false);
-  const [score,setScore] = useState(null)
+  const [score,setScore] = useState(0)
 
   useInterval(() => runGame(), difValue)
 
-  const randomApplePlacement = () => {
+  const placeRandomApple = () => {
     let newApple = initialApple.map(([x,y])=>[
-      Math.floor(Math.random() * x),
-      Math.floor(Math.random() * y)
+      Math.floor(Math.random() * columns),
+      Math.floor(Math.random() * rows)
     ])
     setApple(newApple)
+  }
+
+  const checkAppleColision = () => {
+    if (apple[0][0] ===snake[0][0] && apple[0][1] ===snake[0][1]) {
+      const newScore = score +1;
+      setScore(newScore)
+      return true;
+    }
   }
 
   const runGame = () => {
     const newSnake = [ ...snake ]
     const newSnakeHead = [ newSnake[0][0] + snakeDirection[0], newSnake[0][1] + snakeDirection[1] ]
     newSnake.unshift(newSnakeHead)
-    newSnake.pop()
+    if (checkAppleColision()) {
+      placeRandomApple()
+    }
+    if(!checkAppleColision()) {
+    newSnake.pop()}
     setSnake(newSnake)
   }
 
   
   const changeDirection = (event: React.KeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
-      case "A":
+      case "a":
       case "ArrowLeft":
         setSnakeDirection([-1, 0]);
         break;
-      case "W":
+      case "w":
       case "ArrowUp":
         setSnakeDirection([0, -1]);
         break;
-      case "D":
+      case "d":
       case "ArrowRight":
         setSnakeDirection([1, 0]);
         break;
-      case "S":
+      case "s":
       case "ArrowDown":
         setSnakeDirection([0, 1]);
         break;
