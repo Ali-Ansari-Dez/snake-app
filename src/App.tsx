@@ -17,18 +17,14 @@ const initialApple = [[4,4]]
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [difValue, setDifValue] = useState(500); //to change difficulty later
+  const [difValue, setDifValue] = useState<number|null>(null); //to change difficulty later
   const [snake, setSnake] = useState(initialSnake);
   const [apple, setApple] = useState(initialApple);
   const [snakeDirection, setSnakeDirection] = useState([0, -1]);
-  const [gameOver, setGameOver] = useState();
+  const [gameOver, setGameOver] = useState(false);
+  const [score,setScore] = useState(null)
 
   useInterval(() => runGame(), difValue)
-  
-  
-
-
-
 
   const randomApplePlacement = () => {
     let newApple = initialApple.map(([x,y])=>[
@@ -38,12 +34,11 @@ function App() {
     setApple(newApple)
   }
 
-  
-
   const runGame = () => {
     const newSnake = [ ...snake ]
     const newSnakeHead = [ newSnake[0][0] + snakeDirection[0], newSnake[0][1] + snakeDirection[1] ]
     newSnake.unshift(newSnakeHead)
+    newSnake.pop()
     setSnake(newSnake)
   }
 
@@ -78,6 +73,7 @@ function App() {
 		setApple(initialApple)
 		setSnakeDirection([ 0, -1 ])
     runGame()
+    setDifValue(200)
 	}
 
   useEffect(() => {
@@ -115,19 +111,21 @@ function App() {
             min="50"
             max="500"
             step="50"
-            defaultValue={difValue}
+            defaultValue={200}
             onChange={handleRangeChange}
           />
         </form>
+        <p>Score:{score}</p>
         <button type="button" onClick={play}>play</button>
       </div>
+      <div className="canvasDiv">
       <canvas
         ref={canvasRef}
         id="myCanvas"
         width={gridSize * columns}
         height={gridSize * rows}
       ></canvas>
-      
+      </div>
     </div>
   );
 }
