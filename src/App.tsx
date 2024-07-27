@@ -12,49 +12,61 @@ const gridSize: number = 30;
 const columns: number = 30;
 const rows: number = 20;
 
-const initialSnake = [ [ 15, 10 ], [ 15, 11 ],[15,12] ]
-const initialApple = [[4,4]]
+const initialSnake = [
+  [15, 10],
+  [15, 11],
+  [15, 12],
+];
+const initialApple = [[4, 4]];
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [difValue, setDifValue] = useState<number|null>(null); //to change difficulty later
+  const [difValue, setDifValue] = useState<number | null>(null); //to change difficulty later
   const [snake, setSnake] = useState(initialSnake);
   const [apple, setApple] = useState(initialApple);
   const [snakeDirection, setSnakeDirection] = useState([0, -1]);
   const [gameOver, setGameOver] = useState(false);
-  const [score,setScore] = useState(0)
+  const [score, setScore] = useState(0);
 
-  useInterval(() => runGame(), difValue)
+  useInterval(() => runGame(), difValue);
 
   const placeRandomApple = () => {
-    let newApple = initialApple.map(([x,y])=>[
+    let newApple = initialApple.map(([x, y]) => [
       Math.floor(Math.random() * columns),
-      Math.floor(Math.random() * rows)
-    ])
-    setApple(newApple)
-  }
+      Math.floor(Math.random() * rows),
+    ]);
+    setApple(newApple);
+  };
 
   const checkAppleColision = () => {
-    if (apple[0][0] ===snake[0][0] && apple[0][1] ===snake[0][1]) {
-      const newScore = score +1;
-      setScore(newScore)
+    if (apple[0][0] === snake[0][0] && apple[0][1] === snake[0][1]) {
+      const newScore = score + 1;
+      setScore(newScore);
       return true;
     }
+  };
+
+
+  const handleOutOfBounds = () => {
+    
   }
 
   const runGame = () => {
-    const newSnake = [ ...snake ]
-    const newSnakeHead = [ newSnake[0][0] + snakeDirection[0], newSnake[0][1] + snakeDirection[1] ]
-    newSnake.unshift(newSnakeHead)
+    const newSnake = [...snake];
+    const newSnakeHead = [
+      newSnake[0][0] + snakeDirection[0],
+      newSnake[0][1] + snakeDirection[1],
+    ];
+    newSnake.unshift(newSnakeHead);
     if (checkAppleColision()) {
-      placeRandomApple()
+      placeRandomApple();
     }
-    if(!checkAppleColision()) {
-    newSnake.pop()}
-    setSnake(newSnake)
-  }
+    if (!checkAppleColision()) {
+      newSnake.pop();
+    }
+    setSnake(newSnake);
+  };
 
-  
   const changeDirection = (event: React.KeyboardEvent<HTMLDivElement>) => {
     switch (event.key) {
       case "a":
@@ -80,27 +92,36 @@ function App() {
     let value = parseInt(event.target.value);
     setDifValue(value);
   };
-  const play =() => {
-		setSnake(initialSnake)
-		setApple(initialApple)
-		setSnakeDirection([ 0, -1 ])
-    runGame()
-    setDifValue(200)
-	}
+  const play = () => {
+    setSnake(initialSnake);
+    setApple(initialApple);
+    setSnakeDirection([0, -1]);
+    runGame();
+    setDifValue(200);
+  };
 
   useEffect(() => {
     if (canvasRef.current) {
-      const canvas = canvasRef.current
-      const contex = canvas.getContext("2d")
+      const canvas = canvasRef.current;
+      const contex = canvas.getContext("2d");
       if (contex) {
         contex.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        contex.fillStyle ="red"
-        contex.fillRect(apple[0][0]*gridSize,apple[0][1]*gridSize,gridSize,gridSize)
+        contex.fillStyle = "red";
+        contex.fillRect(
+          apple[0][0] * gridSize,
+          apple[0][1] * gridSize,
+          gridSize,
+          gridSize
+        );
 
-        contex.fillStyle = "#a3d001"
-        contex.strokeStyle = "#000"
-        snake.forEach(([ x, y ]) => contex.fillRect(x * gridSize , y * gridSize, gridSize, gridSize))
-        snake.forEach(([x,y]) =>contex.strokeRect(x * gridSize , y * gridSize, gridSize, gridSize))
+        contex.fillStyle = "#a3d001";
+        contex.strokeStyle = "#000";
+        snake.forEach(([x, y]) =>
+          contex.fillRect(x * gridSize, y * gridSize, gridSize, gridSize)
+        );
+        snake.forEach(([x, y]) =>
+          contex.strokeRect(x * gridSize, y * gridSize, gridSize, gridSize)
+        );
       }
     }
 
@@ -109,9 +130,13 @@ function App() {
     // }
   }, [snake, apple, gameOver]);
 
-  
   return (
-    <div className="App" role="button" tabIndex={0} onKeyDown={(event) => changeDirection(event)}>
+    <div
+      className="App"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(event) => changeDirection(event)}
+    >
       <h1>my Snake game app thingy</h1>
       <div className="difficultyAndScore">
         <form>
@@ -128,15 +153,17 @@ function App() {
           />
         </form>
         <p>Score:{score}</p>
-        <button type="button" onClick={play}>play</button>
+        <button type="button" onClick={play}>
+          play
+        </button>
       </div>
       <div className="canvasDiv">
-      <canvas
-        ref={canvasRef}
-        id="myCanvas"
-        width={gridSize * columns}
-        height={gridSize * rows}
-      ></canvas>
+        <canvas
+          ref={canvasRef}
+          id="myCanvas"
+          width={gridSize * columns}
+          height={gridSize * rows}
+        ></canvas>
       </div>
     </div>
   );
