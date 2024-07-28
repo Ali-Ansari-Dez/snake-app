@@ -2,10 +2,7 @@ import React, { useState, useRef, ChangeEvent, useEffect } from "react";
 import useInterval from "./useInterval";
 import "./App.css";
 
-// type CanvasProps = React.DetailedHTMLProps<
-//   React.CanvasHTMLAttributes<HTMLCanvasElement>,
-//   HTMLCanvasElement
-// >;
+
 
 //probably should make a grid-like system?
 const gridSize: number = 30;
@@ -17,21 +14,24 @@ const initialSnake = [
   [15, 11],
   [15, 12],
 ];
-const initialApple = [[4, 4]];
+const initialApple = [[5, 15]];
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [difValue, setDifValue] = useState<number | null>(null); //to change difficulty later
-  const [snake, setSnake] = useState(initialSnake);
-  const [apple, setApple] = useState(initialApple);
-  const [snakeDirection, setSnakeDirection] = useState([0, -1]);
+  const [difficultyValue, setDifficultyValue] = useState<number | null>(null); //to change difficulty later
+  const [rangeValue, setRangeValue] = useState(200)
+  const [snake, setSnake] = useState<number[][]>(initialSnake);
+  const [apple, setApple] = useState<number[][]>(initialApple);
+  const [snakeDirection, setSnakeDirection] = useState<number[]>([0, -1]);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [highScore, setHighScore] = useState(0)
 
-  useInterval(() => runGame(), difValue);
+
+  useInterval(() => runGame(), difficultyValue);
 
   const placeRandomApple = () => {
-    let newApple = initialApple.map(([x, y]) => [
+    let newApple = initialApple.map(() => [
       Math.floor(Math.random() * columns),
       Math.floor(Math.random() * rows),
     ]);
@@ -47,8 +47,36 @@ function App() {
   };
 
 
-  const handleOutOfBounds = () => {
-    
+  const handleOutOfBounds = (newSnakeHead:number[]) => {
+    if (newSnakeHead[0] === -1 && snakeDirection[0] === -1 ) {
+      newSnakeHead[0] = 29
+    }
+    if (newSnakeHead[0] === 30 && snakeDirection[0] === 1) {
+      newSnakeHead[0] = 0
+    }
+    if (newSnakeHead[1] === 20 && snakeDirection[1] === 1) {
+      newSnakeHead[1] = 0
+    }
+    if (newSnakeHead[1] === -1 && snakeDirection[1] === -1) {
+      newSnakeHead[1] = 19
+    }
+    return newSnakeHead
+  }
+
+  const handleGameOver = () => {
+    if(gameOver){
+      
+    }
+  }
+
+  const snakeBitesItself = (snake:number[][]) => {
+    for (let i = 3; i < snake.length; i++) {
+      if (snake[0][0]===snake[i][0] && snake[0][1]===snake[i][1]) {
+        setGameOver(true)
+        setDifficultyValue(null)
+        handleGameOver()
+      }
+    }
   }
 
   const runGame = () => {
@@ -57,6 +85,7 @@ function App() {
       newSnake[0][0] + snakeDirection[0],
       newSnake[0][1] + snakeDirection[1],
     ];
+    handleOutOfBounds(newSnakeHead)
     newSnake.unshift(newSnakeHead);
     if (checkAppleColision()) {
       placeRandomApple();
@@ -65,39 +94,53 @@ function App() {
       newSnake.pop();
     }
     setSnake(newSnake);
+    snakeBitesItself(newSnake)
   };
 
-  const changeDirection = (event: React.KeyboardEvent<HTMLDivElement>) => {
+
+  
+  const changeDirection = (event: KeyboardEvent) => {
     switch (event.key) {
       case "a":
       case "ArrowLeft":
-        setSnakeDirection([-1, 0]);
+        if(snakeDirection[0] != 1) 
+        {setSnakeDirection([-1, 0])};
         break;
       case "w":
       case "ArrowUp":
-        setSnakeDirection([0, -1]);
+        if(snakeDirection[1] != 1)
+        {setSnakeDirection([0, -1])};
         break;
       case "d":
       case "ArrowRight":
-        setSnakeDirection([1, 0]);
+        if(snakeDirection[0] != -1)
+        {setSnakeDirection([1, 0])};
         break;
       case "s":
       case "ArrowDown":
+        if(snakeDirection[1] != -1)
         setSnakeDirection([0, 1]);
         break;
     }
   };
 
+  useEffect(() => {
+    document.addEventListener("keydown", changeDirection);
+    return () => {
+      document.removeEventListener("keydown", changeDirection);
+    };
+  }, [snakeDirection]);
+
   const handleRangeChange = (event: ChangeEvent<HTMLInputElement>): void => {
     let value = parseInt(event.target.value);
-    setDifValue(value);
+    setRangeValue(value);
   };
   const play = () => {
     setSnake(initialSnake);
     setApple(initialApple);
     setSnakeDirection([0, -1]);
-    runGame();
-    setDifValue(200);
+    setDifficultyValue(rangeValue);
+    setGameOver(false)
   };
 
   useEffect(() => {
@@ -133,9 +176,9 @@ function App() {
   return (
     <div
       className="App"
-      role="button"
-      tabIndex={0}
-      onKeyDown={(event) => changeDirection(event)}
+      //role="button"
+      // tabIndex={0}
+      // onKeyDown={(event) => changeDirection(event)}
     >
       <h1>my Snake game app thingy</h1>
       <div className="difficultyAndScore">
@@ -165,8 +208,17 @@ function App() {
           height={gridSize * rows}
         ></canvas>
       </div>
+    <div className="gameOverDiv" style={gameOver ? {display:'block'}:{}}>
+      <h2>you lost dawg, might wanna try again</h2>
+      <p>Your Score: {score}</p>
+      <p>HighScore: {highScore}</p>
+      <button type="button" onClick={play}>play again</button>
+    </div>
     </div>
   );
 }
 
 export default App;
+
+//modal
+//setting window on keydown
